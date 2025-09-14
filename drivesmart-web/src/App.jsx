@@ -17,6 +17,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 import { MapPin, Package, Flag, Timer } from "lucide-react";
 
+// ⬇️ NEW: header logo
+import logoUrl from "./assets/drivesmart-logo.svg";
+
 // Sticky summary chips under header
 function StickySummary({ summary, fuelCount }) {
   if (!summary) return null;
@@ -30,7 +33,9 @@ function StickySummary({ summary, fuelCount }) {
           </div>
           <div className="rounded-lg border p-3 bg-card/50">
             <div className="text-xs text-muted-foreground">Duration</div>
-            <div className="font-semibold">{Math.round(summary.duration_seconds / 3600)} h</div>
+            <div className="font-semibold">
+              {Math.round(summary.duration_seconds / 3600)} h
+            </div>
           </div>
           <div className="rounded-lg border p-3 bg-card/50">
             <div className="text-xs text-muted-foreground">Fuel stops</div>
@@ -54,7 +59,10 @@ export default function App() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: name === "current_cycle_used" ? Number(value) : value }));
+    setForm((f) => ({
+      ...f,
+      [name]: name === "current_cycle_used" ? Number(value) : value,
+    }));
   };
 
   const onSubmit = async (e) => {
@@ -79,7 +87,15 @@ export default function App() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur border-b">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-          <div className="font-semibold text-lg">DriveSmart</div>
+          <div className="flex items-center gap-2">
+            <img
+              src={logoUrl}
+              alt="DriveSmart logo"
+              className="h-6 w-6 select-none transition-transform duration-150 will-change-transform hover:scale-105"
+              draggable="false"
+            />
+            <div className="font-semibold text-lg leading-none">DriveSmart</div>
+          </div>
           <div className="flex items-center gap-2">
             <div className="hidden md:block text-sm text-muted-foreground mr-1">
               Route &amp; ELD Log Planner
@@ -100,7 +116,9 @@ export default function App() {
       <div className="mx-auto max-w-7xl px-4 py-6 grid gap-6 md:grid-cols-[380px_1fr]">
         {/* Left: Form */}
         <Card className="self-start">
-          <CardHeader><CardTitle>Trip Inputs</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>Trip Inputs</CardTitle>
+          </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="space-y-4" aria-busy={loading}>
               {/* Current location */}
@@ -153,7 +171,9 @@ export default function App() {
 
               {/* Current cycle used */}
               <div className="grid gap-2">
-                <Label htmlFor="current_cycle_used">Current cycle used (hrs)</Label>
+                <Label htmlFor="current_cycle_used">
+                  Current cycle used (hrs)
+                </Label>
                 <div className="relative">
                   <Timer className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -191,15 +211,21 @@ export default function App() {
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div className="rounded-xl border p-3 bg-card/50 shadow-sm">
                     <div className="text-muted-foreground">Distance</div>
-                    <div className="font-semibold">{summary.distance_miles} mi</div>
+                    <div className="font-semibold">
+                      {summary.distance_miles} mi
+                    </div>
                   </div>
                   <div className="rounded-xl border p-3 bg-card/50 shadow-sm">
                     <div className="text-muted-foreground">Duration</div>
-                    <div className="font-semibold">{Math.round(summary.duration_seconds / 3600)} h</div>
+                    <div className="font-semibold">
+                      {Math.round(summary.duration_seconds / 3600)} h
+                    </div>
                   </div>
                   <div className="rounded-xl border p-3 bg-card/50 shadow-sm">
                     <div className="text-muted-foreground">Fuel stops</div>
-                    <div className="font-semibold">{data?.stops?.fueling?.length ?? 0}</div>
+                    <div className="font-semibold">
+                      {data?.stops?.fueling?.length ?? 0}
+                    </div>
                   </div>
                 </div>
               </>
@@ -209,7 +235,9 @@ export default function App() {
 
         {/* Right: Results */}
         <Card>
-          <CardHeader className="pb-2"><CardTitle>Results</CardTitle></CardHeader>
+          <CardHeader className="pb-2">
+            <CardTitle>Results</CardTitle>
+          </CardHeader>
           <CardContent>
             <Tabs defaultValue="map" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -224,12 +252,18 @@ export default function App() {
                   <Skeleton className="h-[60vh] w-full rounded-xl" />
                 ) : data?.route ? (
                   <div className="h-[60vh] w-full overflow-hidden rounded-xl border">
-                    <MapView route={data?.route} waypoints={data?.waypoints} stops={data?.stops} />
+                    <MapView
+                      route={data?.route}
+                      waypoints={data?.waypoints}
+                      stops={data?.stops}
+                    />
                   </div>
                 ) : (
                   <div className="h-[60vh] w-full rounded-xl border grid place-items-center">
                     <div className="text-center">
-                      <div className="text-sm font-medium">Enter locations to plan a route.</div>
+                      <div className="text-sm font-medium">
+                        Enter locations to plan a route.
+                      </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         We’ll draw your route and show fuel stops automatically.
                       </div>
