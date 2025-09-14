@@ -17,7 +17,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 import { MapPin, Package, Flag, Timer } from "lucide-react";
 
-// ⬇️ NEW: header logo
+// Header logo
 import logoUrl from "./assets/drivesmart-logo.svg";
 
 // Sticky summary chips under header
@@ -52,24 +52,35 @@ export default function App() {
     current_location: "Kansas City, MO",
     pickup_location: "Chicago, IL",
     dropoff_location: "Dallas, TX",
-    current_cycle_used: 20,
+    // store as string to control 2-digit UI; convert on submit
+    current_cycle_used: "20",
   });
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({
-      ...f,
-      [name]: name === "current_cycle_used" ? Number(value) : value,
-    }));
+
+    if (name === "current_cycle_used") {
+      // allow digits only, max 2 characters
+      const cleaned = value.replace(/\D/g, "").slice(0, 2);
+      setForm((f) => ({ ...f, current_cycle_used: cleaned }));
+      return;
+    }
+
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await planTrip(form);
+      // convert the 2-digit string to number on submit (fallback 0)
+      const payload = {
+        ...form,
+        current_cycle_used: Number(form.current_cycle_used || 0),
+      };
+      const res = await planTrip(payload);
       setData(res);
       toast.success("Trip planned!");
     } catch (err) {
@@ -169,24 +180,29 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Current cycle used */}
+              {/* Current cycle used — 2 digits only */}
               <div className="grid gap-2">
-                <Label htmlFor="current_cycle_used">
-                  Current cycle used (hrs)
-                </Label>
+                <Label htmlFor="current_cycle_used">Current cycle used (hrs)</Label>
                 <div className="relative">
                   <Timer className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="current_cycle_used"
                     name="current_cycle_used"
-                    type="number"
-                    min="0"
-                    max="70"
+                    // use text to honor maxLength; numeric filtering done in onChange
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d{1,2}"
+                    maxLength={2}
                     className="pl-9"
                     value={form.current_cycle_used}
                     onChange={onChange}
+                    placeholder="0–70"
+                    aria-describedby="cycle-help"
                   />
                 </div>
+                <span id="cycle-help" className="text-xs text-muted-foreground">
+                  Enter two digits (0–70).
+                </span>
               </div>
 
               <Button
