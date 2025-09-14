@@ -98,11 +98,11 @@ export default function App() {
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur border-b">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <img
               src={logoUrl}
               alt="DriveSmart logo"
-              className="h-6 w-6 select-none transition-transform duration-150 will-change-transform hover:scale-105"
+              className="h-8 w-8 md:h-9 md:w-9 select-none transition-transform duration-150 will-change-transform hover:scale-105"
               draggable="false"
             />
             <div className="font-semibold text-lg leading-none">DriveSmart</div>
