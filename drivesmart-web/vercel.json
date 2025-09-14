@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html", "has": [{ "type": "host", "value": "" }], "missing": [{ "type": "file" }] }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
