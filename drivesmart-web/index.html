@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <title>DriveSmart</title>
+
+    <!-- Prevent theme flash: set class BEFORE app mounts -->
+    <script>
+      (function () {
+        try {
+          var storageKey = "theme";
+          var stored = localStorage.getItem(storageKey);
+          var mql = window.matchMedia("(prefers-color-scheme: dark)");
+          var system = mql.matches ? "dark" : "light";
+          var theme = stored || system;
+          if (theme === "dark") document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = theme;
+
+          // keep in sync if system preference changes and user hasn't chosen
+          mql.addEventListener?.("change", function (e) {
+            var current = localStorage.getItem(storageKey);
+            if (current) return; // user chose explicitly; don't override
+            var next = e.matches ? "dark" : "light";
+            document.documentElement.classList.toggle("dark", next === "dark");
+            document.documentElement.style.colorScheme = next;
+          });
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
