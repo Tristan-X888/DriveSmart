@@ -38,14 +38,15 @@ INSTALLED_APPS = [
 ]
 
 # --------------------------------------------------------------------------------------
-# Middleware
+# Middleware (order matters)
 # --------------------------------------------------------------------------------------
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # must be high in the stack
     "django.middleware.security.SecurityMiddleware",
+    # WhiteNoise must come right after SecurityMiddleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 
-    # If you plan to serve static files from Django in prod, uncomment WhiteNoise:
-    # "whitenoise.middleware.WhiteNoiseMiddleware",
+    # CORS should be high in the stack and before CommonMiddleware
+    "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -82,7 +83,6 @@ if os.environ.get("DATABASE_URL"):
     # Example for dj-database-url if you want (optional):
     # import dj_database_url
     # DATABASES = {"default": dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=600)}
-    # For now, fall back to sqlite if not using dj-database-url
     pass
 
 DATABASES = DATABASES if "DATABASES" in globals() else {
@@ -106,18 +106,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # --------------------------------------------------------------------------------------
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "Africa/Nairobi"  # match your working timezone; change if needed
+TIME_ZONE = "Africa/Nairobi"
 USE_I18N = True
 USE_TZ = True
 
 # --------------------------------------------------------------------------------------
-# Static files
+# Static files (WhiteNoise)
 # --------------------------------------------------------------------------------------
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# If using WhiteNoise, also set:
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# For Django ≤4.x this is the usual setting:
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# WhiteNoise tuning
+WHITENOISE_AUTOREFRESH = DEBUG          # no caching in dev; auto-reload
+WHITENOISE_MAX_AGE = 31536000           # cache immutable files for 1 year
+WHITENOISE_USE_FINDERS = DEBUG          # only use finders in DEBUG
 
 # --------------------------------------------------------------------------------------
 # DRF
@@ -125,7 +130,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
-        # enable browsable API in debug only:
         *(["rest_framework.renderers.BrowsableAPIRenderer"] if DEBUG else []),
     ],
 }
@@ -141,34 +145,26 @@ else:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = [FRONTEND_ORIGIN] if FRONTEND_ORIGIN else []
 
-# If you use cookies/SessionAuth across domains (not required for this API-only app):
 CORS_ALLOW_CREDENTIALS = False
 
-# CSRF (only needed if you use forms/cookies; safe to keep aligned to your frontend)
 CSRF_TRUSTED_ORIGINS = []
 if FRONTEND_ORIGIN:
-    # Django expects scheme + domain; Vercel provides https by default
     CSRF_TRUSTED_ORIGINS.append(FRONTEND_ORIGIN)
 
 # --------------------------------------------------------------------------------------
 # Security (reverse proxy / https)
 # --------------------------------------------------------------------------------------
-# If behind a proxy (Render/Railway), honor X-Forwarded-Proto so request.is_secure() works:
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-# In production you may enable these:
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "False").lower() in ("1", "true", "yes", "on")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 
 # --------------------------------------------------------------------------------------
-# Logging (optional, helpful in prod)
+# Logging (optional)
 # --------------------------------------------------------------------------------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
