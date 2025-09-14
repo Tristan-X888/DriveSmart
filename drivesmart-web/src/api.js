@@ -1,8 +1,21 @@
 // Small API client for the Django backend.
 // Uses Vite env var VITE_API_BASE when present, otherwise defaults to localhost.
 
-const API_BASE =
+export const API_BASE =
   (import.meta?.env?.VITE_API_BASE || "http://127.0.0.1:8000").replace(/\/+$/, "");
+
+// ---- helpers ----
+function sanitizeCycleUsed(val) {
+  // keep only digits, limit to 2 chars (UI mirrors this), then clamp 0–70
+  const digits = String(val ?? "").replace(/\D/g, "").slice(0, 2);
+  const n = Number.parseInt(digits || "0", 10);
+  return Math.max(0, Math.min(70, Number.isFinite(n) ? n : 0));
+}
+
+// optional light trimming for text inputs (doesn't alter valid content)
+function trimStr(x) {
+  return typeof x === "string" ? x.trim() : x;
+}
 
 async function jsonFetch(url, options = {}) {
   const res = await fetch(url, {
@@ -40,9 +53,15 @@ async function jsonFetch(url, options = {}) {
  * }
  */
 export async function planTrip(payload) {
+  const body = {
+    current_location: trimStr(payload?.current_location),
+    pickup_location: trimStr(payload?.pickup_location),
+    dropoff_location: trimStr(payload?.dropoff_location),
+    current_cycle_used: sanitizeCycleUsed(payload?.current_cycle_used),
+  };
   return jsonFetch(`${API_BASE}/api/trips/`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
